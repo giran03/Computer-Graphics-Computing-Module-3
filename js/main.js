@@ -1,6 +1,7 @@
 import * as THREE from './three.module.js';
 import { OrbitControls } from './OrbitControls.js';
 import { GLTFLoader } from './GLTFLoader.js';
+import { RectAreaLightHelper } from './RectAreaLightHelper.js';
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -10,6 +11,10 @@ const controls = new OrbitControls( camera, renderer.domElement );
 scene.background = new THREE.Color( 0x525252 );
 renderer.setSize( window .innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
+
+// shadow declarations
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
 // variables
 let rotateNinetyDeg = Math.PI*0.5;
@@ -21,34 +26,41 @@ let enableGridHelper = false;
 // room boundaries
 // floor
 const floorGeo = new THREE.BoxGeometry( 5, .1, 5);
-const floorMat = new THREE.MeshBasicMaterial( {color:0x9c804e, wireframe: wireframeStatus} );
+const floorMat = new THREE.MeshStandardMaterial( {color:0x9c804e, wireframe: wireframeStatus} );
 const floorMesh = new THREE.Mesh( floorGeo, floorMat );
+floorMesh.receiveShadow = true;
 floorMesh.position.set(0,0,0);
 scene.add(floorMesh);
 
-//left wall
-const leftWallGeo = new THREE.BoxGeometry( .1, 2.9, 5);
-const leftWallMat = new THREE.MeshBasicMaterial( {color:0xf7f7f7, wireframe: wireframeStatus} );
-const leftWallMesh = new THREE.Mesh( leftWallGeo, leftWallMat );
-leftWallMesh.position.set(-2.55,1.5,0);
-scene.add(leftWallMesh);
+// ceiling
+const ceilingGeo = new THREE.BoxGeometry( 5, .1, 5);
+const ceilingMat = new THREE.MeshStandardMaterial( {color:0x9c804e, wireframe: wireframeStatus, transparent: true, opacity: 0} );
+const ceilingMesh = new THREE.Mesh( ceilingGeo, ceilingMat );
+ceilingMesh.castShadow = true;
+ceilingMesh.position.set(0,3,0);
+scene.add(ceilingMesh);
+
 
 // right wall | divided into 4 wall panels to create a window and a window divider
 const rightWall1Geo = new THREE.BoxGeometry( .1, 2.9, 2.5);
-const rightWallMat = new THREE.MeshBasicMaterial( {color:0xf7f7f7, wireframe: wireframeStatus} );
+const rightWallMat = new THREE.MeshStandardMaterial( {color:0xf7f7f7, wireframe: wireframeStatus} );
 const rightWall1Mesh = new THREE.Mesh( rightWall1Geo, rightWallMat );
+rightWall1Mesh.castShadow = true;
 
 const rightWall2Geo = new THREE.BoxGeometry( .1, 2.9, 1);
 const rightWall2Mesh = new THREE.Mesh( rightWall2Geo, rightWallMat );
+rightWall2Mesh.castShadow = true;
 
 const rightWall3Geo = new THREE.BoxGeometry( .1, 1.2, 1.5);
 const rightWall3Mesh = new THREE.Mesh( rightWall3Geo, rightWallMat );
+rightWall3Mesh.castShadow = true;
 
 const rightWall4Geo = new THREE.BoxGeometry( .1, .4, 1.5);
 const rightWall4Mesh = new THREE.Mesh( rightWall4Geo, rightWallMat );   
+rightWall4Mesh.castShadow = true;
 
 const windowDividerGeo = new THREE.BoxGeometry( .1, 1.3, .05);
-const windowDividerMat = new THREE.MeshBasicMaterial( {color:0xb3b3b3, wireframe: wireframeStatus} );
+const windowDividerMat = new THREE.MeshStandardMaterial( {color:0xb3b3b3, wireframe: wireframeStatus} );
 const windowDividerMesh = new THREE.Mesh( windowDividerGeo, windowDividerMat ); 
 
 rightWall1Mesh.rotation.y = rotateNinetyDeg;
@@ -64,12 +76,27 @@ windowDividerMesh.position.set(.75,1.9,-2.55);
 
 scene.add(rightWall1Mesh,rightWall2Mesh,rightWall3Mesh,
     rightWall4Mesh,windowDividerMesh);
+    
+// transparent walls | used to block directional light
+//front wall
+const frontWallGeo = new THREE.BoxGeometry( .1, 2.9, 5);
+const frontWallMat = new THREE.MeshStandardMaterial( {color:0xf7f7f7, wireframe: wireframeStatus, transparent: true, opacity: 0} );
+const frontWallMesh = new THREE.Mesh( frontWallGeo, frontWallMat );
+frontWallMesh.castShadow = true;
+frontWallMesh.position.set(2.55,1.5,0);
+scene.add(frontWallMesh);
+//left wall
+const leftWallGeo = new THREE.BoxGeometry( .1, 2.9, 5);
+const leftWallMat = new THREE.MeshStandardMaterial( {color:0xf7f7f7, wireframe: wireframeStatus} );
+const leftWallMesh = new THREE.Mesh( leftWallGeo, leftWallMat );
+leftWallMesh.position.set(-2.55,1.5,0);
+scene.add(leftWallMesh);
 
 // table | consists of 2 box geometry to create a L-Shape table
 const tableGeo = new THREE.BoxGeometry( 1, .1, 1);
 const table2Geo = new THREE.BoxGeometry( 1, .1, 3);
 
-const tableMat = new THREE.MeshBasicMaterial( {color:0x1c1c1c, wireframe: wireframeStatus} );
+const tableMat = new THREE.MeshStandardMaterial( {color:0x1c1c1c, wireframe: wireframeStatus} );
 
 const tableMesh = new THREE.Mesh( tableGeo, tableMat );
 const table2Mesh = new THREE.Mesh( table2Geo, tableMat );
@@ -83,7 +110,7 @@ scene.add(tableMesh, table2Mesh);
 const chairGeo = new THREE.BoxGeometry( .8, .1, 1);
 const chairBackRestGeo = new THREE.BoxGeometry( 1.2, .1, 1);
 
-const chairMat = new THREE.MeshBasicMaterial( {color:0x1c1c1c, wireframe: wireframeStatus} );
+const chairMat = new THREE.MeshStandardMaterial( {color:0x1c1c1c, wireframe: wireframeStatus} );
 
 const chairMesh = new THREE.Mesh( chairGeo, chairMat );
 const chairBackRestMesh = new THREE.Mesh( chairBackRestGeo, chairMat );
@@ -94,7 +121,7 @@ chairMesh.position.set(-.9,.65,-1);
 
 //chair stand
 const chairFeet1Geo = new THREE.BoxGeometry( .1, 1, .1);
-const chairFeetMat = new THREE.MeshBasicMaterial( {color:0xcfcfcf, wireframe: wireframeStatus} );
+const chairFeetMat = new THREE.MeshStandardMaterial( {color:0xcfcfcf, wireframe: wireframeStatus} );
 const chairFeet1Mesh = new THREE.Mesh( chairFeet1Geo, chairFeetMat );
 
 const chairFeet2Geo = new THREE.BoxGeometry( .1, 1, .1);
@@ -119,13 +146,13 @@ scene.add(chairMesh,chairBackRestMesh,chairFeet1Mesh,chairFeet2Mesh,
 
 // monitor and television
 const monitorGeo = new THREE.BoxGeometry( 1.4,.7,.1);
-const bezelMat = new THREE.MeshBasicMaterial( {color: 0xcfcfcf, wireframe: wireframeStatus} );
+const bezelMat = new THREE.MeshStandardMaterial( {color: 0xcfcfcf, wireframe: wireframeStatus} );
 const monitorMesh = new THREE.Mesh( monitorGeo, bezelMat );
 monitorMesh.rotation.y = rotateNinetyDeg;
 monitorMesh.position.set(-2.3,1.6,-1);
 
 const monitorScreenGeo = new THREE.PlaneGeometry(1.35,.65);
-const monitorScreenMat = new THREE.MeshBasicMaterial( {color: 0xffffff, wireframe: wireframeStatus, side: THREE.DoubleSide} );
+const monitorScreenMat = new THREE.MeshStandardMaterial( {color: 0xffffff, wireframe: wireframeStatus, side: THREE.DoubleSide} );
 const monitorScreenMesh = new THREE.Mesh( monitorScreenGeo,monitorScreenMat );
 monitorScreenMesh.rotation.y = rotateNinetyDeg;
 monitorScreenMesh.position.set(-2.249,1.6,-1);
@@ -136,7 +163,7 @@ tvMesh.rotation.y = rotateNinetyDeg;
 tvMesh.position.set(-2.45,2,1.3);
 
 const tvScreenGeo = new THREE.PlaneGeometry(1.95,1.05);
-const tvScreenMat = new THREE.MeshBasicMaterial( {color: 0xffffff, wireframe: wireframeStatus, side: THREE.DoubleSide} );
+const tvScreenMat = new THREE.MeshStandardMaterial( {color: 0xffffff, wireframe: wireframeStatus, side: THREE.DoubleSide} );
 const tvScreenMesh = new THREE.Mesh( tvScreenGeo,tvScreenMat );
 tvScreenMesh.rotation.y = rotateNinetyDeg;
 tvScreenMesh.position.set(-2.399,2,1.3);
@@ -145,20 +172,20 @@ scene.add(monitorMesh, tvMesh, monitorScreenMesh, tvScreenMesh);
 
 // system unit
 const sysUnitGeo = new THREE.BoxGeometry(.7,.7,.4);
-const sysUnitMat = new THREE.MeshBasicMaterial( {color: 0xcfcfcf, wireframe: wireframeStatus} );
+const sysUnitMat = new THREE.MeshStandardMaterial( {color: 0xcfcfcf, wireframe: wireframeStatus} );
 const sysUnitMesh = new THREE.Mesh( sysUnitGeo, sysUnitMat );
 sysUnitMesh.rotation.y = Math.PI*.1;
 sysUnitMesh.position.set(-2.1,1.4,-2.1);
 
 // peripherals
 const keybGeo = new THREE.BoxGeometry(.3,.05,.7);
-const keybMat = new THREE.MeshBasicMaterial( {color: 0xcfcfcf, wireframe: wireframeStatus} );
+const keybMat = new THREE.MeshStandardMaterial( {color: 0xcfcfcf, wireframe: wireframeStatus} );
 const keybMesh = new THREE.Mesh( keybGeo, keybMat );
 keybMesh.rotation.y = Math.PI*-.1;
 keybMesh.position.set(-1.8,1.1,-.8);
 
 const mouseGeo = new THREE.CapsuleGeometry( .05, .05, 4, 8 );
-const mouseMat = new THREE.MeshBasicMaterial( {color: 0xcfcfcf} );
+const mouseMat = new THREE.MeshStandardMaterial( {color: 0xcfcfcf} );
 const mouseMesh = new THREE.Mesh( mouseGeo, mouseMat );
 mouseMesh.rotation.x = rotateNinetyDeg;
 mouseMesh.rotation.z = rotateNinetyDeg;
@@ -168,7 +195,7 @@ scene.add(sysUnitMesh,keybMesh,mouseMesh);
 
 //couch
 const couch1Geo = new THREE.TorusGeometry(.6,.4,7.5,15);
-const couchMat = new THREE.MeshBasicMaterial( {color: 0xff673d, wireframe: wireframeStatus} );
+const couchMat = new THREE.MeshStandardMaterial( {color: 0xff673d, wireframe: wireframeStatus} );
 const couch1Mesh = new THREE.Mesh( couch1Geo, couchMat );
 couch1Mesh.rotation.x = Math.PI*.5;
 couch1Mesh.position.set(1,.3,1)
@@ -179,12 +206,36 @@ couch2Mesh.position.set(1,.1,1)
 
 scene.add(couch1Mesh,couch2Mesh);
 
+// lights
+const directionalLight = new THREE.DirectionalLight( 0xff9100, 2 );
+directionalLight.position.set(1,3,-4);
+directionalLight.lookAt(0,0,0)
+directionalLight.castShadow = true;
+
+const ambientLight = new THREE.AmbientLight( 0x404040, 1 ); // soft white light
+
+const monitorLight = new THREE.RectAreaLight( 0x00f7ff, 3, 1.35,.65 );
+monitorLight.position.set( -2.35,1.6,-1 );
+monitorLight.lookAt( -4,1.6,-1 );
+
+scene.add(directionalLight, ambientLight, monitorLight )
+
+// shadow properties
+directionalLight.shadow.mapSize.width = 2048; // default
+directionalLight.shadow.mapSize.height = 2048; // default
+
 // helper
 const size = 15;
 const divisions = 15;
 const gridHelper = new THREE.GridHelper( size, divisions );
 if (enableGridHelper == true)
     scene.add( gridHelper );
+
+const monitorLighthelper = new RectAreaLightHelper( monitorLight );
+monitorLight.add( monitorLighthelper ); // helper must be added as a child of the light
+
+const DirectionalLighthelper = new THREE.DirectionalLightHelper( directionalLight, 2 );
+scene.add( DirectionalLighthelper );
 
 // camera position
 camera.position.set( 2.9, 4.2, 3);
