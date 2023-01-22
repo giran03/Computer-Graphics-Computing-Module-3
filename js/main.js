@@ -20,8 +20,9 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 let rotateNinetyDeg = Math.PI*0.5;
 
 // S E T T I N G S
-let wireframeStatus = false;
-let enableGridHelper = false;
+let wireframeStatus = false; // set to 'true' to enable wireframe.
+let enableGridHelper = false; // set to 'true' to enable grid helper.
+let enableLightHelper = false; // set to 'true' to enable light helper.
 
 // R O O M  B O U N D A R I E S
 // F L O O R
@@ -282,23 +283,26 @@ const gridHelper = new THREE.GridHelper( size, divisions );
 if (enableGridHelper == true)
     scene.add( gridHelper );
 
-const pointLightHelper = new THREE.PointLightHelper( ptLight, .5 );
-scene.add( pointLightHelper );
-
-const monitorLighthelper = new RectAreaLightHelper( monitorLight );
-monitorLight.add( monitorLighthelper ); // helper must be added as a child of the light
-
-const televisionLighthelper = new RectAreaLightHelper( televisionLight );
-televisionLight.add( televisionLighthelper );
-
-const tableLighthelper = new RectAreaLightHelper( tableLight );
-tableLight.add( tableLighthelper );
-
-const sideLighthelper = new RectAreaLightHelper( sideLight );
-sideLight.add( sideLighthelper );
-
-const DirectionalLighthelper = new THREE.DirectionalLightHelper( directionalLight, 2 );
-scene.add( DirectionalLighthelper );
+if (enableLightHelper == true)
+{
+    const pointLightHelper = new THREE.PointLightHelper( ptLight, .5 );
+    scene.add( pointLightHelper );
+    
+    const monitorLighthelper = new RectAreaLightHelper( monitorLight );
+    monitorLight.add( monitorLighthelper ); // helper must be added as a child of the light
+    
+    const televisionLighthelper = new RectAreaLightHelper( televisionLight );
+    televisionLight.add( televisionLighthelper );
+    
+    const tableLighthelper = new RectAreaLightHelper( tableLight );
+    tableLight.add( tableLighthelper );
+    
+    const sideLighthelper = new RectAreaLightHelper( sideLight );
+    sideLight.add( sideLighthelper );
+    
+    const DirectionalLighthelper = new THREE.DirectionalLightHelper( directionalLight, 2 );
+    scene.add( DirectionalLighthelper );
+}
 
 // C A M E R A  P O S I T I O N  &  L O O K  A T
 camera.position.set( 2.9, 4.2, 3);
