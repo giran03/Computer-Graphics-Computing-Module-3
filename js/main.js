@@ -1,3 +1,7 @@
+// Created by: https://github.com/giran03
+// Computer Graphics Computing: Module 3 Quiz 1
+// 🎮 🕹️ 🖥️  G A M I N G  R O O M  🖥️ 🕹️ 🎮
+
 import * as THREE from './three.module.js';
 import { OrbitControls } from './OrbitControls.js';
 import { RectAreaLightHelper } from './RectAreaLightHelper.js';
