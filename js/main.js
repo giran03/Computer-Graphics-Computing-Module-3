@@ -17,7 +17,7 @@ document.body.appendChild( renderer.domElement );
 
 // ⚙️ S E T T I N G S ⚙️
 let wireframeStatus = false; // set to 'true' to enable wireframe. 'true'|'false'
-let enableGridHelper = false; // set to 'true' to enable grid helper. 'true'|'false'
+let enableGridHelper = false; // set to 'true' to enablze grid helper. 'true'|'false'
 let enableLightHelper = false; // set to 'true' to enable light helper. 'true'|'false'
 let enableTextures = true; // set to 'true' to enable textures. 'true'|'false'
 
